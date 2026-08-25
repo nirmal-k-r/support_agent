@@ -52,4 +52,4 @@ async def chat(request: ChatRequest) -> ChatResponse:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("api:app", host="0.0.0.0", port=int(os.getenv("PORT", "3005")))
+    uvicorn.run("api:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")))
