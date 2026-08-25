@@ -33,7 +33,7 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/ticket", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
     """Send a customer message to the agent and return its response."""
     issue = request.Customer_Issue or request.message
