@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser, isStaff } from "@/lib/auth";
 import { query } from "@/lib/db";
-import { processTicketAction, approveTicketAction } from "@/lib/actions";
+import { processTicketAction, approveTicketAction, sendTicketEmailAction } from "@/lib/actions";
 
 export default async function TicketDetailPage({
   params,
@@ -137,6 +137,17 @@ export default async function TicketDetailPage({
         )}
         {t.status === "discarded" && (
           <p className="lead">This ticket was discarded by the agent.</p>
+        )}
+
+        {t.submitter_email && (
+          <form action={sendTicketEmailAction.bind(null, t.id)} style={{ marginTop: 16 }}>
+            <button className="btn btn-secondary" type="submit">
+              Send email to customer
+            </button>
+            <span className="muted" style={{ marginLeft: 10 }}>
+              {t.submitter_email}
+            </span>
+          </form>
         )}
       </div>
     </div>

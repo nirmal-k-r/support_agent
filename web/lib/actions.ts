@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { destroySession, getSessionUser, isStaff, hashPassword } from "./auth";
 import { processTicket, approveTicket } from "./tickets";
+import { sendTicketEmail } from "./email";
 import { query } from "./db";
 
 export async function logout() {
@@ -37,6 +38,36 @@ export async function approveTicketAction(id: string) {
   }
   revalidatePath(`/dashboard/${id}`);
   revalidatePath("/dashboard");
+}
+
+export async function sendTicketEmailAction(id: string) {
+  const user = await getSessionUser();
+  if (!user || !isStaff(user.role)) {
+    redirect("/login");
+  }
+  const { rows } = await query<{
+    submitter_email: string | null;
+    email_response: string | null;
+    conversation_id: string;
+  }>("SELECT submitter_email, email_response, conversation_id FROM tickets WHERE id = $1", [
+    id,
+  ]);
+  if (rows.length === 0) {
+    throw new Error("Ticket not found.");
+  }
+  const ticket = rows[0];
+  if (!ticket.submitter_email) {
+    throw new Error("This ticket has no contact email to send to.");
+  }
+  const result = await sendTicketEmail({
+    to: ticket.submitter_email,
+    subject: `Your support ticket update (${ticket.conversation_id})`,
+    text: ticket.email_response || "Your support ticket has been updated.",
+  });
+  if (!result.sent) {
+    throw new Error(result.reason || "Email could not be sent.");
+  }
+  revalidatePath(`/dashboard/${id}`);
 }
 
 export async function createStaffAction(formData: FormData) {
