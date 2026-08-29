@@ -1,1 +1,2 @@
-mcp
+# server.py uses the MCP 1.x FastMCP API.
+mcp==1.28.1
